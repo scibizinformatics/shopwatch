@@ -1,12 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
 
-
-#------search query
-search = raw_input('search item: ')
-print 'SEARCHING...'
-
-
 def Get_Pdt(ItemTag):
 	#------get product info
 	ItemUrl = ItemTag.a['href']
@@ -27,17 +21,17 @@ def Get_Pdt(ItemTag):
 			ItemSale = 'No Sale'
 			ItemOldPrice = 'None'
 
+	return {
+		'pdt_name': ItemName,
+		'pdt_url': ItemUrl,
+		'pdt_img': ItemImg,
+		'pdt_price': ItemPrice,
+		'pdt_sale': ItemSale,
+		'pdt_old_price': ItemOldPrice,
+	}
 
-	print 'Product name: ', ItemName
-	print 'Product url: ', ItemUrl
-	print 'Product img: ', ItemImg
-	print 'Product price: ', ItemPrice
-	print 'Product sale: ', ItemSale
-	print 'Product old price: ', ItemOldPrice
-	print '\n \n'
 
-
-def Get_Response(pagenum):
+def Get_Response(pagenum, search):
 	#------------- create a soup
 	payload = {'page':str(pagenum), 'q':search}
 	r = requests.get('http://www.lazada.com.ph/catalog', params=payload)
@@ -46,33 +40,25 @@ def Get_Response(pagenum):
 	return soup
 
 
-#------find max pages
-soup = Get_Response(1)
-SearchItemsTag = soup.find_all('div', {'data-qa-locator' :'product-item'})
-pages = soup.find_all('a', {'class' :'c-paging__link'})
-pages = [int(page.text) for page in pages]
-maxpage = max(pages)
-# maxpage = 1
+def Scrape_Lazada(search_query):
+	#------search query
+	search = search_query
 
-#------loop over pages
-SearchTitle = soup.head.title.text
-print 'RESULTS FOR "%s" \n \n' % search
+	# #------find max pages
+	# soup = Get_Response(1)
+	# SearchItemsTag = soup.find_all('div', {'data-qa-locator' :'product-item'})
+	# pages = soup.find_all('a', {'class' :'c-paging__link'})
+	# pages = [int(page.text) for page in pages]
+	# maxpage = max(pages)
+	maxpage = 1
 
-count = 0
-for pagenum in range(1,(maxpage+1)):
-	soup = Get_Response(pagenum)
-	SearchItemsTag = soup.find_all('div', {'data-qa-locator' :'product-item'})
-	for itemtag in SearchItemsTag:
-		Get_Pdt(itemtag)
-		count += 1
-
-	choice = raw_input("NEXT PAGE RESULTS? (Enter or y/n): ")
-	if (choice=='y' or choice==''):
-		pass	
-	else:
-		break	
-
-print '%d ITEMS FOUND' % count
-print 'END OF SEARCH'
+	RESULTS = []
+	for pagenum in range(1,(maxpage+1)):
+		soup = Get_Response(pagenum, search)
+		SearchItemsTag = soup.find_all('div', {'data-qa-locator' :'product-item'})
+		
+		for itemtag in SearchItemsTag:
+			RESULTS.append(Get_Pdt(itemtag))
+	return RESULTS
 
 #------end
