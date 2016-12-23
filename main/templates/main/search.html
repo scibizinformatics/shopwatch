@@ -1,0 +1,14 @@
+<h3>Results for '{{ query }}'</h1>
+
+<ul>
+	{% for result in results %}
+	<li>
+		<a href="{{ result.pdt_url }}">{{ result.pdt_name }}</a><br>
+		<img src="{{ result.pdt_img }}"><br>
+		Price: {{ result.pdt_price }} <br>
+		Sale: {{ result.pdt_sale }} <br>
+		Old Price: {{ result.pdt_old_price }} <br>
+	</li><br>
+	{% endfor %}
+</ul>
+
